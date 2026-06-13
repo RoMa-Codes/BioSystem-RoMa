@@ -17,7 +17,7 @@ screen_width=1400
 screen_height=800
 screen=pygame.display.set_mode([screen_width, screen_height])
 running = True
-creatures_size = 100
+creatures_size = 50
 circle_x =  screen_width // 2 - creatures_size // 2
 circle_y = screen_height // 2 - creatures_size // 2
 food_timer = 0
@@ -40,7 +40,7 @@ class Food:
         self.y = random.randint(0, screen_height)
 foods = []
 
-for i in range(100):
+for i in range(0):
     foods.append(Food())
 
 # Obtiene la carpeta donde reside main.py
@@ -52,7 +52,7 @@ apple_sprite = pygame.image.load(apple_immage_path)
 animal_sprite = pygame.image.load(slug_immage_path)
 apple_sprite = pygame.image.load(apple_immage_path)
 sprite_animal = pygame.transform.scale(animal_sprite, (creatures_size, creatures_size))
-apple_sprite = pygame.transform.scale(apple_sprite, (20, 20))
+apple_sprite = pygame.transform.scale(apple_sprite, (50, 50))
 
 # chaing the backround color to any RGB value
 screen.fill((0, 128, 0))
@@ -66,7 +66,7 @@ while running:
     # 
     clock.tick(60)
     food_timer += 1
-    if food_timer >= 60:
+    if food_timer >= 180:
         food_timer = 0
         foods.append(Food())
     
