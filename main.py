@@ -3,17 +3,20 @@ import sys
 #makes this work
 pygame.init()
 
+# Open a window on the screen
 flags = pygame.OPENGL | pygame.FULLSCREEN
 window_surface = pygame.display.set_mode((1920, 1080), flags, vsync=1)
-# Open a window on the screen
+
+#name the window
+pygame.display.set_caption("BioSystem-RoMa") 
 
 screen_width=1400
 screen_height=800
 screen=pygame.display.set_mode([screen_width, screen_height])
 running = True
-circle_x = 350 
-circle_y = 200
 creatures_size = 100
+circle_x =  screen_width // 2 - creatures_size // 2
+circle_y = screen_height // 2 - creatures_size // 2
 animal_sprite = pygame.image.load("slug.png")
 sprite_animal = pygame.transform.scale(animal_sprite, (creatures_size, creatures_size))
 speed = .5
@@ -23,8 +26,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # (Optional) Fill the screen with a color so it isn't black
-    screen.fill((128, 128, 128)) 
+    # chaing the backround color to any RGB value
+    screen.fill((0, 128, 0)) 
     
     screen.blit(sprite_animal, (circle_x, circle_y))
     teclas = pygame.key.get_pressed()
