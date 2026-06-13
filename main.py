@@ -1,5 +1,7 @@
 import pygame
 import sys
+import random
+import os
 #makes this work
 pygame.init()
 
@@ -9,7 +11,8 @@ window_surface = pygame.display.set_mode((1920, 1080), flags, vsync=1)
 
 #name the window
 pygame.display.set_caption("BioSystem-RoMa") 
-
+#vars
+clock = pygame.time.Clock()
 screen_width=1400
 screen_height=800
 screen=pygame.display.set_mode([screen_width, screen_height])
@@ -17,24 +20,62 @@ running = True
 creatures_size = 100
 circle_x =  screen_width // 2 - creatures_size // 2
 circle_y = screen_height // 2 - creatures_size // 2
-import os
+food_timer = 0
+
+
+# Creant aliment
+class Food:
+    def __init__(self):
+        food = random.randint(1, 10)
+        if food < 11:
+            self.nutrients = 100
+            self.name = "Apple"
+        elif food > 1 and food < 6:
+            self.nutrients = 30
+            self.name = "Bush"
+        elif food > 5:
+            self.nutrients = 5
+            self.name = "Plant"
+        self.x = random.randint(0, screen_width)
+        self.y = random.randint(0, screen_height)
+foods = []
+
+for i in range(100):
+    foods.append(Food())
 
 # Obtiene la carpeta donde reside main.py
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-IMAGE_PATH = os.path.join(BASE_DIR, "slug.png")
+slug_immage_path = os.path.join(BASE_DIR, "slug.png")
+apple_immage_path = os.path.join(BASE_DIR, "apple.png")
+apple_sprite = pygame.image.load(apple_immage_path)
 
-# Carga la imagen usando la ruta absoluta calculada
-animal_sprite = pygame.image.load(IMAGE_PATH)
-speed = .5
+animal_sprite = pygame.image.load(slug_immage_path)
+apple_sprite = pygame.image.load(apple_immage_path)
+sprite_animal = pygame.transform.scale(animal_sprite, (creatures_size, creatures_size))
+apple_sprite = pygame.transform.scale(apple_sprite, (20, 20))
+
+# chaing the backround color to any RGB value
+screen.fill((0, 128, 0))
+speed = 5
 while running:
     # Look for events (mouse clicks, key presses)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # chaing the backround color to any RGB value
-    screen.fill((0, 128, 0)) 
-    sprite_animal = pygame.transform.scale(animal_sprite, (creatures_size, creatures_size))
+    # 
+    clock.tick(60)
+    food_timer += 1
+    if food_timer >= 60:
+        food_timer = 0
+        foods.append(Food())
+    
+    screen.fill((0, 128, 0))
+    
+    for food in foods:
+        if food.name == "Apple":
+            screen.blit(apple_sprite, (food.x, food.y)) 
+    
     screen.blit(sprite_animal, (circle_x, circle_y))
     teclas = pygame.key.get_pressed()
     if teclas[pygame.K_LEFT] and circle_x > 0:
