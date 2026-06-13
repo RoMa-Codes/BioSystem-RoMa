@@ -17,8 +17,14 @@ running = True
 creatures_size = 100
 circle_x =  screen_width // 2 - creatures_size // 2
 circle_y = screen_height // 2 - creatures_size // 2
-animal_sprite = pygame.image.load("slug.png")
-sprite_animal = pygame.transform.scale(animal_sprite, (creatures_size, creatures_size))
+import os
+
+# Obtiene la carpeta donde reside main.py
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+IMAGE_PATH = os.path.join(BASE_DIR, "slug.png")
+
+# Carga la imagen usando la ruta absoluta calculada
+animal_sprite = pygame.image.load(IMAGE_PATH)
 speed = .5
 while running:
     # Look for events (mouse clicks, key presses)
@@ -28,7 +34,7 @@ while running:
 
     # chaing the backround color to any RGB value
     screen.fill((0, 128, 0)) 
-    
+    sprite_animal = pygame.transform.scale(animal_sprite, (creatures_size, creatures_size))
     screen.blit(sprite_animal, (circle_x, circle_y))
     teclas = pygame.key.get_pressed()
     if teclas[pygame.K_LEFT] and circle_x > 0:
