@@ -42,31 +42,7 @@ class Food:
 foods = []
 
 
-class herb_eating_Creatures:
-    def __init__(self):
-        # Stats del Deer
-        self.needed_nutrients = 50
-        self.repro_nutrients = 80
-        self.want_nutrients = 100
 
-        self.norm_speed = 3
-        self.panic_speed = 4
-
-        self.radius = 100      # rango de movimiento
-        self.sight = 50
-
-        self.name = "Deer"
-        self.hp = 100
-
-        # posición base.
-        self.base_x = random.randint(0, screen_width)
-        self.base_y = random.randint(0, screen_height)
-
-        # posición actual
-        self.x = self.base_x
-        self.y = self.base_y
-
-        self.timer = 0
 
 def update(self):
     self.timer += 1
