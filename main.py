@@ -31,7 +31,7 @@ class Food:
         if Identity < 11:
             self.nutrients = 100
             self.name = "Apple"
-        elif Identity > 1 and food < 6:
+        elif Identity > 1 and Identity < 6:
             self.nutrients = 30
             self.name = "Bush"
         elif Identity > 5:
@@ -58,7 +58,7 @@ class herb_eating_Creatures:
         self.name = "Deer"
         self.hp = 100
 
-        # posición base
+        # posición base.
         self.base_x = random.randint(0, screen_width)
         self.base_y = random.randint(0, screen_height)
 
@@ -70,26 +70,21 @@ class herb_eating_Creatures:
 
 def update(self):
     self.timer += 1
-
     if self.timer >= 30:
-         self.timer = 0
-
+        self.timer = 0
     while True:
         dx = random.randint(-self.radius, self.radius)
         dy = random.randint(-self.radius, self.radius)
-
         if dx*dx + dy*dy <= self.radius*self.radius:
             self.x = self.base_x + dx
             self.y = self.base_y + dy
             break
-    
-        self.x = random.randint(0, screen_width)
-        self.y = random.randint(0, screen_height)
 animals_list = []
 for i in range(0):
     foods.append(Food())
 for i in range(5):
     animals_list.append(herb_eating_Creatures())
+
 
 # Obtiene la carpeta donde reside main.py
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -123,6 +118,11 @@ while running:
     for food in foods:
         if food.name == "Apple":
             screen.blit(apple_sprite, (food.x, food.y))
+    
+        # Añade estas dos líneas justo antes de dibujar
+    
+
+    # Esto es lo que ya tienes en tu código para dibujarlos:
     for a in animals_list:
         screen.blit(sprite_animal, (a.x, a.y))
     
