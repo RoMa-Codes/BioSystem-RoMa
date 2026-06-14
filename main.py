@@ -77,19 +77,19 @@ class herb_eating_Creatures:
 
     def update(self):
         # NEW: Check if there is an apple inside the sight range before moving
-        comida_cercana = None
-        menor_distancia = self.sight  # Only care if it is within self.sight
+        clowse_food = None
+        smallest_distance = self.sight  # Only care if it is within self.sight
 
         for food in foods:
-            dist_a_comida = math.hypot(food.x - self.x, food.y - self.y)
-            if dist_a_comida <= menor_distancia:
-                menor_distancia = dist_a_comida
-                comida_cercana = food
+            dist_to_food = math.hypot(food.x - self.x, food.y - self.y)
+            if dist_to_food <= smallest_distance:
+                smallest_distance = dist_to_food
+                clowse_food = food
 
         # NEW: If an apple is found, override destination directly to its location
-        if comida_cercana is not None:
-            self.dest_x = comida_cercana.x
-            self.dest_y = comida_cercana.y
+        if clowse_food is not None:
+            self.dest_x = clowse_food.x
+            self.dest_y = clowse_food.y
 
         # checks the distance to the destinacion
         dx_dist = self.dest_x - self.x
@@ -103,7 +103,7 @@ class herb_eating_Creatures:
              
         else:
             # NEW: If it reached an apple, don't trigger the idle wander timer, just wait to eat it
-            if comida_cercana is None:
+            if clowse_food is None:
                 # if its has arrived to the destinacion, it will choose a new one but olso set a timer to rest
                 self.timer += 1
                 
@@ -123,6 +123,7 @@ class herb_eating_Creatures:
             else:
                 # Reset timer while on top of food so it doesn't get stuck in idle state later
                 self.timer = 0
+        
 
 animals_list = []
 for i in range(20):
