@@ -44,6 +44,7 @@ foods = []
 
 class herb_eating_Creatures:
     def __init__(self):
+       
         # Stats del Deer
         self.needed_nutrients = 50
         self.repro_nutrients = 80
@@ -68,17 +69,39 @@ class herb_eating_Creatures:
 
         self.timer = 0
 
+        # new: variables to remember the destination and a timer for waiting
+        self.dest_x = self.x
+        self.dest_y = self.y
+
+        self.waittimer = random.randint(20, 60) 
     def update(self):
-        self.timer += 1
-        if self.timer >= 30:
-            self.timer = 0
-        while True:
-            dx = random.randint(-self.radius, self.radius)
-            dy = random.randint(-self.radius, self.radius)
-            if dx*dx + dy*dy <= self.radius*self.radius:
-                self.x = self.base_x + dx
-                self.y = self.base_y + dy
-                break
+        # checks the distance to the destinacion
+        dx_dist = self.dest_x - self.x
+        dy_dist = self.dest_y - self.y
+        distance = math.hypot(dx_dist, dy_dist)
+
+        # if it hasn't reached the destination, move towards it
+        if distance > self.norm_speed:
+            self.x += (dx_dist / distance) * self.norm_speed
+            self.y += (dy_dist / distance) * self.norm_speed
+             
+        else:
+            # if its has arrived to the destinacion, it will choose a new one but olso set a timer to rest
+            self.timer += 1
+            
+            if self.timer >= self.waittimer:  # Mantiene tu límite original de 30 frames
+                self.timer = 0
+                self.waittimer = random.randint(20, 200) 
+                
+                # we pick a random destination within the sight range
+                random_dx = random.randint(-self.sight, self.sight)
+                random_dy = random.randint(-self.sight, self.sight)
+                
+                # to stop the animal from standing still, we only set a new destination if the random values are not both zero
+                if random_dx != 0 or random_dy != 0:
+                    #the new destination respects the screen boundaries, so the animal doesnt go off the screen
+                    self.dest_x = max(0, min(screen_width - 50, self.x + random_dx))
+                    self.dest_y = max(0, min(screen_height - 50, self.y + random_dy))
 animals_list = []
 for i in range(10):
     foods.append(Food())
@@ -86,7 +109,7 @@ for i in range(5):
     animals_list.append(herb_eating_Creatures())
 
 
-# Obtiene la carpeta donde reside main.py
+# looks were the folder with he main.py is
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 slug_immage_path = os.path.join(BASE_DIR, "slug.png")
 apple_immage_path = os.path.join(BASE_DIR, "apple.png")
@@ -119,11 +142,11 @@ while running:
         if food.name == "Apple":
             screen.blit(apple_sprite, (food.x, food.y))
     
-        # Añade estas dos líneas justo antes de dibujar
+        
     for a in animals_list:
         a.update()
 
-    # Esto es lo que ya tienes en tu código para dibujarlos:
+    
     for a in animals_list:
         screen.blit(sprite_animal, (a.x, a.y))
     
