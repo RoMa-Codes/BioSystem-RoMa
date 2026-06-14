@@ -28,10 +28,10 @@ food_timer = 0
 class Food:
     def __init__(self):
         Identity = random.randint(1, 10)
-        if Identity < 11:
+        if Identity < 2:
             self.nutrients = 100
             self.name = "Apple"
-        elif Identity > 1 and Identity < 6:
+        elif Identity > 1 and Identity < 11:
             self.nutrients = 30
             self.name = "Bush"
         elif Identity > 5:
@@ -74,7 +74,23 @@ class herb_eating_Creatures:
         self.dest_y = self.y
 
         self.waittimer = random.randint(20, 60) 
+
     def update(self):
+        # NEW: Check if there is an apple inside the sight range before moving
+        comida_cercana = None
+        menor_distancia = self.sight  # Only care if it is within self.sight
+
+        for food in foods:
+            dist_a_comida = math.hypot(food.x - self.x, food.y - self.y)
+            if dist_a_comida <= menor_distancia:
+                menor_distancia = dist_a_comida
+                comida_cercana = food
+
+        # NEW: If an apple is found, override destination directly to its location
+        if comida_cercana is not None:
+            self.dest_x = comida_cercana.x
+            self.dest_y = comida_cercana.y
+
         # checks the distance to the destinacion
         dx_dist = self.dest_x - self.x
         dy_dist = self.dest_y - self.y
@@ -86,37 +102,45 @@ class herb_eating_Creatures:
             self.y += (dy_dist / distance) * self.norm_speed
              
         else:
-            # if its has arrived to the destinacion, it will choose a new one but olso set a timer to rest
-            self.timer += 1
-            
-            if self.timer >= self.waittimer:  # Mantiene tu límite original de 30 frames
+            # NEW: If it reached an apple, don't trigger the idle wander timer, just wait to eat it
+            if comida_cercana is None:
+                # if its has arrived to the destinacion, it will choose a new one but olso set a timer to rest
+                self.timer += 1
+                
+                if self.timer >= self.waittimer:  # Mantiene tu límite original de 30 frames
+                    self.timer = 0
+                    self.waittimer = random.randint(20, 200) 
+                    
+                    # we pick a random destination within the sight range
+                    random_dx = random.randint(-self.sight, self.sight)
+                    random_dy = random.randint(-self.sight, self.sight)
+                    
+                    # to stop the animal from standing still, we only set a new destination if the random values are not both zero
+                    if random_dx != 0 or random_dy != 0:
+                        #the new destination respects the screen boundaries, so the animal doesnt go off the screen
+                        self.dest_x = max(0, min(screen_width - 50, self.x + random_dx))
+                        self.dest_y = max(0, min(screen_height - 50, self.y + random_dy))
+            else:
+                # Reset timer while on top of food so it doesn't get stuck in idle state later
                 self.timer = 0
-                self.waittimer = random.randint(20, 200) 
-                
-                # we pick a random destination within the sight range
-                random_dx = random.randint(-self.sight, self.sight)
-                random_dy = random.randint(-self.sight, self.sight)
-                
-                # to stop the animal from standing still, we only set a new destination if the random values are not both zero
-                if random_dx != 0 or random_dy != 0:
-                    #the new destination respects the screen boundaries, so the animal doesnt go off the screen
-                    self.dest_x = max(0, min(screen_width - 50, self.x + random_dx))
-                    self.dest_y = max(0, min(screen_height - 50, self.y + random_dy))
+
 animals_list = []
-for i in range(10):
+for i in range(20):
     foods.append(Food())
 for i in range(5):
     animals_list.append(herb_eating_Creatures())
 
 
-# looks were the folder with he main.py is
+# Obtiene la carpeta donde reside main.py
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 slug_immage_path = os.path.join(BASE_DIR, "slug.png")
 apple_immage_path = os.path.join(BASE_DIR, "apple.png")
+bush_immage_path = os.path.join(BASE_DIR, "bush.png")
+
 apple_sprite = pygame.image.load(apple_immage_path)
+bush_sprite = pygame.image.load(bush_immage_path)
 
 animal_sprite = pygame.image.load(slug_immage_path)
-apple_sprite = pygame.image.load(apple_immage_path)
 sprite_animal = pygame.transform.scale(animal_sprite, (creatures_size, creatures_size))
 apple_sprite = pygame.transform.scale(apple_sprite, (50, 50))
 
@@ -141,6 +165,9 @@ while running:
     for food in foods:
         if food.name == "Apple":
             screen.blit(apple_sprite, (food.x, food.y))
+    for food in foods:
+        if food.name == "Bush":
+            screen.blit(bush_sprite, (food.x, food.y))
     
         
     for a in animals_list:
