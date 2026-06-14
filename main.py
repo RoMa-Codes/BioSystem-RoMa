@@ -112,8 +112,8 @@ class herb_eating_Creatures:
                     self.waittimer = random.randint(20, 200) 
                     
                     # we pick a random destination within the sight range
-                    random_dx = random.randint(-self.sight, self.radius)
-                    random_dy = random.randint(-self.sight, self.radius)
+                    random_dx = random.randint(-self.radius, self.radius)
+                    random_dy = random.randint(-self.radius, self.radius)
                     
                     # to stop the animal from standing still, we only set a new destination if the random values are not both zero
                     if random_dx != 0 or random_dy != 0:
