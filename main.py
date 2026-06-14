@@ -53,7 +53,7 @@ class herb_eating_Creatures:
         self.norm_speed = 3
         self.panic_speed = 4
 
-        self.radius = 100      # rango de movimiento
+        self.radius = 200      # movemnt range
         self.sight = 50
 
         self.name = "Deer"
@@ -112,14 +112,14 @@ class herb_eating_Creatures:
                     self.waittimer = random.randint(20, 200) 
                     
                     # we pick a random destination within the sight range
-                    random_dx = random.randint(-self.sight, self.sight)
-                    random_dy = random.randint(-self.sight, self.sight)
+                    random_dx = random.randint(-self.sight, self.radius)
+                    random_dy = random.randint(-self.sight, self.radius)
                     
                     # to stop the animal from standing still, we only set a new destination if the random values are not both zero
                     if random_dx != 0 or random_dy != 0:
                         #the new destination respects the screen boundaries, so the animal doesnt go off the screen
-                        self.dest_x = max(0, min(screen_width - 50, self.x + random_dx))
-                        self.dest_y = max(0, min(screen_height - 50, self.y + random_dy))
+                        self.dest_x = max(0, min(screen_width - creatures_size, self.x + random_dx))
+                        self.dest_y = max(0, min(screen_height - creatures_size, self.y + random_dy))
             else:
                 # Reset timer while on top of food so it doesn't get stuck in idle state later
                 self.timer = 0
