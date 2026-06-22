@@ -46,10 +46,12 @@ class herb_eating_Creatures:
     def __init__(self):
        
         # Stats del Deer
+        #neurtrient vars
         self.needed_nutrients = 50
         self.repro_nutrients = 80
         self.want_nutrients = 100
-
+        self.current_neutrients = 80
+        #speed vars
         self.norm_speed = 3
         self.panic_speed = 4
 
@@ -76,53 +78,71 @@ class herb_eating_Creatures:
         self.waittimer = random.randint(20, 60) 
 
     def update(self):
-        # NEW: Check if there is an apple inside the sight range before moving
+        #here we create a timer so in the future we can remove its curent neutriates
+        self.current_neutrients -= 0.05
+        # we create a new variable to store the closest food found in this update cycle, if any
         clowse_food = None
-        smallest_distance = self.sight  # Only care if it is within self.sight
 
-        for food in foods:
-            dist_to_food = math.hypot(food.x - self.x, food.y - self.y)
-            if dist_to_food <= smallest_distance:
-                smallest_distance = dist_to_food
-                clowse_food = food
+        # it only looks for food if it needs it, otherwise it just walks around randomly. This way it doesn't break the system by trying to eat when it's not hungry, and also it doesn't waste time looking for food when it's not needed.
+        if self.current_neutrients < self.want_nutrients:
+            
+            # Solo si tiene hambre extrema, ejecuta el código de buscar comida:
+            smallest_distance = self.sight  
 
-        # NEW: If an apple is found, override destination directly to its location
-        if clowse_food is not None:
-            self.dest_x = clowse_food.x
-            self.dest_y = clowse_food.y
+            for food in foods:
+                dist_to_food = math.hypot(food.x - self.x, food.y - self.y)
+                if dist_to_food <= smallest_distance:
+                    smallest_distance = dist_to_food
+                    clowse_food = food
 
-        # checks the distance to the destinacion
+            # if it find food, it sets the destination to the food's position, otherwise it will just keep walking randomly until it finds some or gets hungry enough to look for it again.
+            if clowse_food is not None:
+                self.dest_x = clowse_food.x
+                self.dest_y = clowse_food.y
+
+        # movement code, it will move towards the destination set by the food searching code if it found some, otherwise it will just keep moving towards a random destination that changes every few seconds. When it reaches the destination, if it's a food, it will eat it and gain nutrients, if it's just a random point, it will wait there for a bit and then choose a new random destination to walk to.
         dx_dist = self.dest_x - self.x
         dy_dist = self.dest_y - self.y
         distance = math.hypot(dx_dist, dy_dist)
 
-        # if it hasn't reached the destination, move towards it
         if distance > self.norm_speed:
             self.x += (dx_dist / distance) * self.norm_speed
             self.y += (dy_dist / distance) * self.norm_speed
              
         else:
-            # NEW: If it reached an apple, don't trigger the idle wander timer, just wait to eat it
-            if clowse_food is None:
-                # if its has arrived to the destinacion, it will choose a new one but olso set a timer to rest
-                self.timer += 1
+            # Si llegó a su destino y era un alimento, lo come y gana nutrientes:
+            if clowse_food is not None:
+                self.current_neutrients += clowse_food.nutrients 
                 
-                if self.timer >= self.waittimer:  # Mantiene tu límite original de 30 frames
+                # if the nutrients gained by eating the food exceed the creature's want_nutrients, it will just set its current_neutrients to want_nutrients, because it doesn't need more than that and it would break the system if it could keep gaining nutrients infinitely.
+
+
+                print(f"ate: {clowse_food.name} | +{clowse_food.nutrients} nutrientes")
+                print(f"entity current nutrients: {self.current_neutrients}")
+                
+                if clowse_food in foods:
+                    foods.remove(clowse_food)
+                
+                self.x = self.dest_x
+                self.y = self.dest_y
+                clowse_food = None 
+                self.timer = 0
+                
+            else:
+                # if it reached its destination and it wasn't food, it means it was just a random point to walk to, so it will wait there for a bit and then choose a new random destination to walk to.
+                self.timer += 1
+                if self.timer >= self.waittimer:
                     self.timer = 0
                     self.waittimer = random.randint(20, 200) 
                     
-                    # we pick a random destination within the sight range
                     random_dx = random.randint(-self.radius, self.radius)
                     random_dy = random.randint(-self.radius, self.radius)
                     
-                    # to stop the animal from standing still, we only set a new destination if the random values are not both zero
                     if random_dx != 0 or random_dy != 0:
-                        #the new destination respects the screen boundaries, so the animal doesnt go off the screen
                         self.dest_x = max(0, min(screen_width - creatures_size, self.x + random_dx))
-                        self.dest_y = max(0, min(screen_height - creatures_size, self.y + random_dy))
-            else:
-                # Reset timer while on top of food so it doesn't get stuck in idle state later
-                self.timer = 0
+                        self.dest_y = max(0, min(screen_width - creatures_size, self.y + random_dy))
+        
+
         
 
 animals_list = []
@@ -188,6 +208,8 @@ while running:
         circle_y -= speed
     if teclas[pygame.K_DOWN] and circle_y < screen_height - creatures_size:       
         circle_y += speed
+    if teclas[pygame.K_ESCAPE]:
+        running = False
     # Update the actual display
     pygame.display.flip()
 
