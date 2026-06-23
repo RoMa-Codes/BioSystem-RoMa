@@ -8,15 +8,15 @@ pygame.init()
 
 # Open a window on the screen
 flags = pygame.OPENGL | pygame.FULLSCREEN
-window_surface = pygame.display.set_mode((1920, 1080), flags, vsync=1)
+screen_width=1400
+screen_height=800
+screen=pygame.display.set_mode([screen_width, screen_height])
 
 #name the window
 pygame.display.set_caption("BioSystem-RoMa") 
 #vars
 clock = pygame.time.Clock()
-screen_width=1400
-screen_height=800
-screen=pygame.display.set_mode([screen_width, screen_height])
+
 running = True
 creatures_size = 50
 circle_x =  screen_width // 2 - creatures_size // 2
@@ -155,6 +155,8 @@ class herb_eating_Creatures:
             else:
                 # if it reached its destination and it wasn't food, it means it was just a random point to walk to, so it will wait there for a bit and then choose a new random destination to walk to.
                 self.timer += 1
+                if self.new_timer == 0:
+                    self.current_neutrients += 1
                 if self.timer >= self.waittimer:
                     self.timer = 0
                     self.waittimer = random.randint(20, 200) 
@@ -164,7 +166,7 @@ class herb_eating_Creatures:
                     
                     if random_dx != 0 or random_dy != 0:
                         self.dest_x = max(0, min(screen_width - creatures_size, self.x + random_dx))
-                        self.dest_y = max(0, min(screen_width - creatures_size, self.y + random_dy))
+                        self.dest_y = max(0, min(screen_height - creatures_size, self.y + random_dy))
         
 
         
