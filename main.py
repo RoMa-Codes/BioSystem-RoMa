@@ -226,7 +226,7 @@ while running:
     # 
     clock.tick(60)
     food_timer += 1
-    if food_timer >= 2000000000:
+    if food_timer >= 180:
         food_timer = 0
         foods.append(Food())
     
