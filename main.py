@@ -22,12 +22,14 @@ running = True
 creatures_size = 50
 circle_x =  screen_width // 2 - creatures_size // 2
 circle_y = screen_height // 2 - creatures_size // 2
-food_timer = 0
+
+
+
 
 def immage_render(immage_name):
     # lerns the way to this folder and sets it up so that future vars can set themselves as the sprite
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    immage_path = os.path.join(BASE_DIR, immage_name)
+    immage_path = os.path.join(BASE_DIR, "assets", "sprites", immage_name)
     final_immage = pygame.image.load(immage_path)
     return final_immage
 
@@ -46,13 +48,14 @@ speed = 5
 # chaing the backround color to any RGB value
 screen.fill((0, 128, 0))
 
-
+#created the food_timer var that will be necesary laiter
+food_timer = 0
 
 #seting up a sound player
 pygame.mixer.init()
 def play_sound(filename):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    sound_path = os.path.join(BASE_DIR, filename)
+    sound_path = os.path.join(BASE_DIR, "assets", "sounds", filename)
     try:
         sound = pygame.mixer.Sound(sound_path)
         sound.play()
@@ -60,7 +63,7 @@ def play_sound(filename):
         print(f"Error al reproducir '{sound_path}': {e}") 
 
 
-# Creant aliment
+# creates foods (that are actualy just plants but ig its fine)
 class Food:
     def __init__(self):
         Identity = random.randint(1, 10)
@@ -122,7 +125,7 @@ class herb_eating_Creatures:
         #here we create a timer so in the future we can remove its curent neutriates
         
         self.new_timer += 1
-        if self.new_timer > 20: # this will make it lose nutrients every second, because the game runs at 60 frames per second, so every 60 updates it will lose nutrients. This way we can make it lose nutrients over time and make it need to eat to survive.
+        if self.new_timer >= 20: # this will make it lose nutrients every second, because the game runs at 60 frames per second, so every 60 updates it will lose nutrients. This way we can make it lose nutrients over time and make it need to eat to survive.
             self.new_timer = 0
             self.current_neutrients -= 1
         if self.current_neutrients < 0:
@@ -228,10 +231,10 @@ while running:
     
     for food in foods:
         if food.name == "Apple":
-            screen.blit(apple_sprite, (food.x, food.y))
+            screen.blit(apple_sprite, (food.x -25, food.y - 25))
     for food in foods:
         if food.name == "Bush":
-            screen.blit(bush_sprite, (food.x, food.y))
+            screen.blit(bush_sprite, (food.x -50, food.y -50))
     
         
     for a in animals_list:
