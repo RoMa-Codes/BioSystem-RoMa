@@ -20,10 +20,10 @@ clock = pygame.time.Clock()
 
 running = True
 creatures_size = 50
-circle_x =  screen_width // 2 - creatures_size // 2
-circle_y = screen_height // 2 - creatures_size // 2
+player_x =  screen_width // 2 - creatures_size // 2
+player_y = screen_height // 2 - creatures_size // 2
 
-
+bush_size = 100
 
 
 def immage_render(immage_name):
@@ -40,7 +40,8 @@ bush_sprite = immage_render("bush.png")
 
 animal_sprite = immage_render("slug.png")
 sprite_animal = pygame.transform.scale(animal_sprite, (creatures_size, creatures_size))
-apple_sprite = pygame.transform.scale(apple_sprite, (50, 50))
+apple_sprite = pygame.transform.scale(apple_sprite, (bush_size/2, bush_size/2))
+bush_sprite = pygame.transform.scale(bush_sprite, (bush_size, bush_size))
 
 #sets the speed of the user
 speed = 5
@@ -231,10 +232,10 @@ while running:
     
     for food in foods:
         if food.name == "Apple":
-            screen.blit(apple_sprite, (food.x -25, food.y - 25))
+            screen.blit(apple_sprite, (food.x -bush_size/4, food.y -bush_size/4))
     for food in foods:
         if food.name == "Bush":
-            screen.blit(bush_sprite, (food.x -50, food.y -50))
+            screen.blit(bush_sprite, (food.x -bush_size/2, food.y -bush_size/2))
     
         
     for a in animals_list:
@@ -242,20 +243,20 @@ while running:
 
     
     for a in animals_list:
-        screen.blit(sprite_animal, (a.x, a.y))
+        screen.blit(sprite_animal, (a.x - creatures_size/2, a.y - creatures_size/2))
     
-    screen.blit(sprite_animal, (circle_x, circle_y))
+    screen.blit(sprite_animal, (player_x, player_y))
     teclas = pygame.key.get_pressed()
-    if teclas[pygame.K_LEFT] and circle_x > 0:
-        circle_x -= speed
-    if teclas[pygame.K_RIGHT] and circle_x < screen_width - creatures_size:
-        circle_x += speed
+    if teclas[pygame.K_LEFT] and player_x > 0:
+        player_x -= speed
+    if teclas[pygame.K_RIGHT] and player_x < screen_width - creatures_size:
+        player_x += speed
     
         
-    if teclas[pygame.K_UP] and circle_y > 0:
-        circle_y -= speed
-    if teclas[pygame.K_DOWN] and circle_y < screen_height - creatures_size:       
-        circle_y += speed
+    if teclas[pygame.K_UP] and player_y > 0:
+        player_y -= speed
+    if teclas[pygame.K_DOWN] and player_y < screen_height - creatures_size:       
+        player_y += speed
     if teclas[pygame.K_ESCAPE]:
         running = False
     # Update the actual display
