@@ -22,6 +22,16 @@ creatures_size = 50
 circle_x =  screen_width // 2 - creatures_size // 2
 circle_y = screen_height // 2 - creatures_size // 2
 food_timer = 0
+#seting up sound player
+pygame.mixer.init()
+def play_sound(filename):
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    sound_path = os.path.join(BASE_DIR, filename)
+    try:
+        sound = pygame.mixer.Sound(sound_path)
+        sound.play()
+    except pygame.error as e:
+        print(f"Error al reproducir '{sound_path}': {e}") 
 
 
 # Creant aliment
@@ -50,7 +60,7 @@ class herb_eating_Creatures:
         self.needed_nutrients = 50
         self.repro_nutrients = 80
         self.want_nutrients = 100
-        self.current_neutrients = 80
+        self.current_neutrients = random.randint(50, self.want_nutrients)
         #speed vars
         self.norm_speed = 3
         self.panic_speed = 4
@@ -68,18 +78,29 @@ class herb_eating_Creatures:
         # posición actual
         self.x = self.base_x
         self.y = self.base_y
-
+        
         self.timer = 0
 
         # new: variables to remember the destination and a timer for waiting
         self.dest_x = self.x
         self.dest_y = self.y
 
-        self.waittimer = random.randint(20, 60) 
+        self.waittimer = random.randint(20, 60)
+        self.new_timer = 0 
 
     def update(self):
         #here we create a timer so in the future we can remove its curent neutriates
-        self.current_neutrients -= 0.05
+        
+        self.new_timer += 1
+        if self.new_timer > 20: # this will make it lose nutrients every second, because the game runs at 60 frames per second, so every 60 updates it will lose nutrients. This way we can make it lose nutrients over time and make it need to eat to survive.
+            self.new_timer = 0
+            self.current_neutrients -= 1
+        if self.current_neutrients < 0:
+            #here we remove the creature from the simulation if it dies of hunger, but for now we will just set its nutrients to 0 and make it stop moving, because we haven't implemented death yet and it would break the system if it could die without being removed from the simulation.
+            play_sound("die.mp3")
+            animals_list.remove(self)
+            
+
         # we create a new variable to store the closest food found in this update cycle, if any
         clowse_food = None
 
@@ -100,14 +121,17 @@ class herb_eating_Creatures:
                 self.dest_x = clowse_food.x
                 self.dest_y = clowse_food.y
 
+        if self.current_neutrients > self.repro_nutrients:
+            pass
+                
         # movement code, it will move towards the destination set by the food searching code if it found some, otherwise it will just keep moving towards a random destination that changes every few seconds. When it reaches the destination, if it's a food, it will eat it and gain nutrients, if it's just a random point, it will wait there for a bit and then choose a new random destination to walk to.
-        dx_dist = self.dest_x - self.x
-        dy_dist = self.dest_y - self.y
-        distance = math.hypot(dx_dist, dy_dist)
+        self.dx_dist = self.dest_x - self.x
+        self.dy_dist = self.dest_y - self.y
+        self.distance = math.hypot(self.dx_dist, self.dy_dist)
 
-        if distance > self.norm_speed:
-            self.x += (dx_dist / distance) * self.norm_speed
-            self.y += (dy_dist / distance) * self.norm_speed
+        if self.distance > self.norm_speed:
+            self.x += (self.dx_dist / self.distance) * self.norm_speed
+            self.y += (self.dy_dist / self.distance) * self.norm_speed
              
         else:
             # Si llegó a su destino y era un alimento, lo come y gana nutrientes:
@@ -146,6 +170,8 @@ class herb_eating_Creatures:
         
 
 animals_list = []
+#this controlls the amount of food and animals that spawns at the start of the simulation, but they will keep spawning over time as well, so it's not like they will be the only ones in the simulation, but it will give it a good start and make it more interesting to watch from the beginning.
+
 for i in range(20):
     foods.append(Food())
 for i in range(5):
@@ -177,7 +203,7 @@ while running:
     # 
     clock.tick(60)
     food_timer += 1
-    if food_timer >= 180:
+    if food_timer >= 2000000000:
         food_timer = 0
         foods.append(Food())
     
@@ -204,6 +230,8 @@ while running:
         circle_x -= speed
     if teclas[pygame.K_RIGHT] and circle_x < screen_width - creatures_size:
         circle_x += speed
+        play_sound("die.mp3")
+        
     if teclas[pygame.K_UP] and circle_y > 0:
         circle_y -= speed
     if teclas[pygame.K_DOWN] and circle_y < screen_height - creatures_size:       
