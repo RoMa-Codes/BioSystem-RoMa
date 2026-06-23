@@ -7,7 +7,7 @@ import math
 pygame.init()
 ###
 # VARS
-usles_var = 4
+usles_var = 5
 # screen vars
 screen_width=1400
 screen_height=800
@@ -82,6 +82,7 @@ class Food:
 foods = []
 
 #generates the herb eating creatures (btw adding var = non there makes them opcional)
+
 class herb_eating_Creatures:
     def __init__(self, spawn_x = None, spawn_y =None):
        
