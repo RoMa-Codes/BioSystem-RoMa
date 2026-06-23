@@ -113,14 +113,15 @@ class herb_eating_Creatures:
 
 
         
-        self.timer = 0
+        
 
         # variables to remember the destination and a timer for waiting
         self.dest_x = self.x
         self.dest_y = self.y
-
+        #creating timers vars
         self.waittimer = random.randint(20, 60)
         self.new_timer = 0 
+        self.timer = 0
 
     def update(self):
         #here we create a timer so in the future we can remove its curent neutriates
@@ -179,6 +180,7 @@ class herb_eating_Creatures:
                 print(f"entity current nutrients: {self.current_neutrients}")
                 
                 if clowse_food in foods:
+                    play_sound("eating_sound.mp3")
                     foods.remove(clowse_food)
                 
                 self.x = self.dest_x
