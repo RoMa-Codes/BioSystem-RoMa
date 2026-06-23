@@ -7,7 +7,7 @@ import math
 pygame.init()
 ###
 # VARS
-
+usles_var = 4
 # screen vars
 screen_width=1400
 screen_height=800
