@@ -38,7 +38,7 @@ def immage_render(immage_name):
 apple_sprite = immage_render("apple.png")
 bush_sprite = immage_render("bush.png")
 
-animal_sprite = immage_render("slug.png")
+animal_sprite = immage_render("slug.webp")
 sprite_animal = pygame.transform.scale(animal_sprite, (creatures_size, creatures_size))
 apple_sprite = pygame.transform.scale(apple_sprite, (bush_size/2, bush_size/2))
 bush_sprite = pygame.transform.scale(bush_sprite, (bush_size, bush_size))
@@ -123,7 +123,14 @@ class herb_eating_Creatures:
         self.waittimer = random.randint(20, 60)
         self.new_timer = 0 
         self.timer = 0
-
+    def repoduce(self):
+        # if it has enough nutrients to reproduce, it will create a new creature of the same type and give it some of its nutrients to start with, and then it will lose some of its own nutrients to account for the energy spent in reproduction. This way we can have a population of creatures that can grow and shrink over time depending on the availability of food and the success of their reproduction.
+        if self.current_neutrients >= self.repro_nutrients:
+            new_creature = herb_eating_Creatures(self.x, self.y)
+            new_creature.current_neutrients = self.current_neutrients // 2
+            self.current_neutrients //= 2
+            animals_list.append(new_creature)
+            print(f"{self.name} reproduced! New {new_creature.name} created at ({new_creature.x}, {new_creature.y})")    
     def update(self):
         #here we create a timer so in the future we can remove its curent neutriates
         
@@ -158,7 +165,7 @@ class herb_eating_Creatures:
                 self.dest_y = clowse_food.y
 
         if self.current_neutrients > self.repro_nutrients:
-            pass
+            self.repoduce()
                 
         # movement code, it will move towards the destination set by the food searching code if it found some, otherwise it will just keep moving towards a random destination that changes every few seconds. When it reaches the destination, if it's a food, it will eat it and gain nutrients, if it's just a random point, it will wait there for a bit and then choose a new random destination to walk to.
         self.x_dist = self.dest_x - self.x
@@ -204,7 +211,14 @@ class herb_eating_Creatures:
                     if random_dx != 0 or random_dy != 0:
                         self.dest_x = max(0, min(screen_width - creatures_size, self.x + random_dx))
                         self.dest_y = max(0, min(screen_height - creatures_size, self.y + random_dy))
-        
+    def repoduce(self):
+        # if it has enough nutrients to reproduce, it will create a new creature of the same type and give it some of its nutrients to start with, and then it will lose some of its own nutrients to account for the energy spent in reproduction. This way we can have a population of creatures that can grow and shrink over time depending on the availability of food and the success of their reproduction.
+        if self.current_neutrients >= self.repro_nutrients:
+            new_creature = herb_eating_Creatures(self.x, self.y)
+            new_creature.current_neutrients = self.current_neutrients // 2
+            self.current_neutrients //= 2
+            animals_list.append(new_creature)
+            print(f"{self.name} reproduced! New {new_creature.name} created at ({new_creature.x}, {new_creature.y})")    
 
         
 
@@ -243,6 +257,7 @@ while running:
         
     for a in animals_list:
         a.update()
+
 
     
     for a in animals_list:
