@@ -5,15 +5,16 @@ import os
 import math
 #makes this work
 pygame.init()
+###
+# VARS
 
-# Open a window on the screen
-flags = pygame.OPENGL | pygame.FULLSCREEN
+# screen vars
 screen_width=1400
 screen_height=800
 screen=pygame.display.set_mode([screen_width, screen_height])
-
 #name the window
 pygame.display.set_caption("BioSystem-RoMa") 
+
 #vars
 clock = pygame.time.Clock()
 
@@ -22,7 +23,32 @@ creatures_size = 50
 circle_x =  screen_width // 2 - creatures_size // 2
 circle_y = screen_height // 2 - creatures_size // 2
 food_timer = 0
-#seting up sound player
+
+def immage_render(immage_name):
+    # lerns the way to this folder and sets it up so that future vars can set themselves as the sprite
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    immage_path = os.path.join(BASE_DIR, immage_name)
+    final_immage = pygame.image.load(immage_path)
+    return final_immage
+
+
+
+apple_sprite = immage_render("apple.png")
+bush_sprite = immage_render("bush.png")
+
+animal_sprite = immage_render("slug.png")
+sprite_animal = pygame.transform.scale(animal_sprite, (creatures_size, creatures_size))
+apple_sprite = pygame.transform.scale(apple_sprite, (50, 50))
+
+#sets the speed of the user
+speed = 5
+
+# chaing the backround color to any RGB value
+screen.fill((0, 128, 0))
+
+
+
+#seting up a sound player
 pygame.mixer.init()
 def play_sound(filename):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -51,9 +77,9 @@ class Food:
         self.y = random.randint(0, screen_height)
 foods = []
 
-
+#generates the herb eating creatures (btw adding var = non there makes them opcional)
 class herb_eating_Creatures:
-    def __init__(self):
+    def __init__(self, spawn_x = None, spawn_y =None):
        
         # Stats del Deer
         #neurtrient vars
@@ -71,17 +97,21 @@ class herb_eating_Creatures:
         self.name = "Deer"
         self.hp = 100
 
-        # posición base.
-        self.base_x = random.randint(0, screen_width)
-        self.base_y = random.randint(0, screen_height)
+        # setting the pozition were it spawns with the self.x var that means its curent pozition
+        if spawn_x == None:
+            self.x = random.randint(0, screen_width)
+        else:
+            self.x = spawn_x
+        if spawn_y == None:
+            self.y = random.randint(0, screen_height)
+        else:
+            self.y = spawn_y
 
-        # posición actual
-        self.x = self.base_x
-        self.y = self.base_y
+
         
         self.timer = 0
 
-        # new: variables to remember the destination and a timer for waiting
+        # variables to remember the destination and a timer for waiting
         self.dest_x = self.x
         self.dest_y = self.y
 
@@ -125,13 +155,13 @@ class herb_eating_Creatures:
             pass
                 
         # movement code, it will move towards the destination set by the food searching code if it found some, otherwise it will just keep moving towards a random destination that changes every few seconds. When it reaches the destination, if it's a food, it will eat it and gain nutrients, if it's just a random point, it will wait there for a bit and then choose a new random destination to walk to.
-        self.dx_dist = self.dest_x - self.x
-        self.dy_dist = self.dest_y - self.y
-        self.distance = math.hypot(self.dx_dist, self.dy_dist)
+        self.x_dist = self.dest_x - self.x
+        self.y_dist = self.dest_y - self.y
+        self.distance = math.hypot(self.x_dist, self.y_dist)
 
         if self.distance > self.norm_speed:
-            self.x += (self.dx_dist / self.distance) * self.norm_speed
-            self.y += (self.dy_dist / self.distance) * self.norm_speed
+            self.x += (self.x_dist / self.distance) * self.norm_speed
+            self.y += (self.y_dist / self.distance) * self.norm_speed
              
         else:
             # Si llegó a su destino y era un alimento, lo come y gana nutrientes:
@@ -180,22 +210,7 @@ for i in range(5):
     animals_list.append(herb_eating_Creatures())
 
 
-# Obtiene la carpeta donde reside main.py
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-slug_immage_path = os.path.join(BASE_DIR, "slug.png")
-apple_immage_path = os.path.join(BASE_DIR, "apple.png")
-bush_immage_path = os.path.join(BASE_DIR, "bush.png")
 
-apple_sprite = pygame.image.load(apple_immage_path)
-bush_sprite = pygame.image.load(bush_immage_path)
-
-animal_sprite = pygame.image.load(slug_immage_path)
-sprite_animal = pygame.transform.scale(animal_sprite, (creatures_size, creatures_size))
-apple_sprite = pygame.transform.scale(apple_sprite, (50, 50))
-
-# chaing the backround color to any RGB value
-screen.fill((0, 128, 0))
-speed = 5
 while running:
     # Look for events (mouse clicks, key presses)
     for event in pygame.event.get():
@@ -232,7 +247,7 @@ while running:
         circle_x -= speed
     if teclas[pygame.K_RIGHT] and circle_x < screen_width - creatures_size:
         circle_x += speed
-        play_sound("die.mp3")
+    
         
     if teclas[pygame.K_UP] and circle_y > 0:
         circle_y -= speed
