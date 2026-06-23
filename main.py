@@ -96,7 +96,7 @@ class herb_eating_Creatures:
         self.panic_speed = 4
 
         self.radius = 200      # movemnt range
-        self.sight = 50
+        self.sight = 100       #seeing range
 
         self.name = "Deer"
         self.hp = 100
