@@ -241,9 +241,10 @@ while running:
     # 
     clock.tick(60)
     food_timer += 1
-    if food_timer >= 180:
-        food_timer = 0
-        foods.append(Food())
+    for a in foods:
+        if food_timer >= 60:
+            food_timer = 0
+            foods.append(Food())
     
     screen.fill((0, 128, 0))
     
