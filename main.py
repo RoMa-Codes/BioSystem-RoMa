@@ -7,7 +7,7 @@ import math
 pygame.init()
 ###
 # VARS
-
+usles_var = 5
 # screen vars
 screen_width=1400
 screen_height=800
@@ -24,8 +24,6 @@ player_x =  screen_width // 2 - creatures_size // 2
 player_y = screen_height // 2 - creatures_size // 2
 
 bush_size = 100
-herb_eating_creatures_amount = 10
-plant_amount = 20
 
 
 def immage_render(immage_name):
@@ -40,7 +38,7 @@ def immage_render(immage_name):
 apple_sprite = immage_render("apple.png")
 bush_sprite = immage_render("bush.png")
 
-animal_sprite = immage_render("slug.png")
+animal_sprite = immage_render("slug.webp")
 sprite_animal = pygame.transform.scale(animal_sprite, (creatures_size, creatures_size))
 apple_sprite = pygame.transform.scale(apple_sprite, (bush_size/2, bush_size/2))
 bush_sprite = pygame.transform.scale(bush_sprite, (bush_size, bush_size))
@@ -84,6 +82,7 @@ class Food:
 foods = []
 
 #generates the herb eating creatures (btw adding var = non there makes them opcional)
+
 class herb_eating_Creatures:
     def __init__(self, spawn_x = None, spawn_y =None):
        
@@ -113,6 +112,10 @@ class herb_eating_Creatures:
         else:
             self.y = spawn_y
 
+
+        
+        
+
         # variables to remember the destination and a timer for waiting
         self.dest_x = self.x
         self.dest_y = self.y
@@ -120,14 +123,21 @@ class herb_eating_Creatures:
         self.waittimer = random.randint(20, 60)
         self.new_timer = 0 
         self.timer = 0
-
+    def repoduce(self):
+        # if it has enough nutrients to reproduce, it will create a new creature of the same type and give it some of its nutrients to start with, and then it will lose some of its own nutrients to account for the energy spent in reproduction. This way we can have a population of creatures that can grow and shrink over time depending on the availability of food and the success of their reproduction.
+        if self.current_neutrients >= self.repro_nutrients:
+            new_creature = herb_eating_Creatures(self.x, self.y)
+            new_creature.current_neutrients = self.current_neutrients // 2
+            self.current_neutrients //= 2
+            animals_list.append(new_creature)
+            print(f"{self.name} reproduced! New {new_creature.name} created at ({new_creature.x}, {new_creature.y})")    
     def update(self):
         #here we create a timer so in the future we can remove its curent neutriates
         
         self.new_timer += 1
         if self.new_timer >= 20: # this will make it lose nutrients every second, because the game runs at 60 frames per second, so every 60 updates it will lose nutrients. This way we can make it lose nutrients over time and make it need to eat to survive.
             self.new_timer = 0
-            self.current_neutrients -= self.norm_speed/3
+            self.current_neutrients -= 1
         if self.current_neutrients < 0:
             #here we remove the creature from the simulation if it dies of hunger, but for now we will just set its nutrients to 0 and make it stop moving, because we haven't implemented death yet and it would break the system if it could die without being removed from the simulation.
             play_sound("die.mp3")
@@ -155,7 +165,7 @@ class herb_eating_Creatures:
                 self.dest_y = clowse_food.y
 
         if self.current_neutrients > self.repro_nutrients:
-            pass
+            self.repoduce()
                 
         # movement code, it will move towards the destination set by the food searching code if it found some, otherwise it will just keep moving towards a random destination that changes every few seconds. When it reaches the destination, if it's a food, it will eat it and gain nutrients, if it's just a random point, it will wait there for a bit and then choose a new random destination to walk to.
         self.x_dist = self.dest_x - self.x
@@ -201,16 +211,23 @@ class herb_eating_Creatures:
                     if random_dx != 0 or random_dy != 0:
                         self.dest_x = max(0, min(screen_width - creatures_size, self.x + random_dx))
                         self.dest_y = max(0, min(screen_height - creatures_size, self.y + random_dy))
-        
+    def repoduce(self):
+        # if it has enough nutrients to reproduce, it will create a new creature of the same type and give it some of its nutrients to start with, and then it will lose some of its own nutrients to account for the energy spent in reproduction. This way we can have a population of creatures that can grow and shrink over time depending on the availability of food and the success of their reproduction.
+        if self.current_neutrients >= self.repro_nutrients:
+            new_creature = herb_eating_Creatures(self.x, self.y)
+            new_creature.current_neutrients = self.current_neutrients // 2
+            self.current_neutrients //= 2
+            animals_list.append(new_creature)
+            print(f"{self.name} reproduced! New {new_creature.name} created at ({new_creature.x}, {new_creature.y})")    
 
         
 
 animals_list = []
 #this controlls the amount of food and animals that spawns at the start of the simulation, but they will keep spawning over time as well, so it's not like they will be the only ones in the simulation, but it will give it a good start and make it more interesting to watch from the beginning.
 
-for i in range(plant_amount):
+for i in range(20):
     foods.append(Food())
-for i in range(herb_eating_creatures_amount):
+for i in range(5):
     animals_list.append(herb_eating_Creatures())
 
 
@@ -221,17 +238,16 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # make the game run on 60 ticks a second consitently
+    # 
     clock.tick(60)
-
-    #makes food spawn
     food_timer += 1
-    if food_timer >= 180:
-        food_timer = 0
-        foods.append(Food())
+    for a in foods:
+        if food_timer >= 60:
+            food_timer = 0
+            foods.append(Food())
     
     screen.fill((0, 128, 0))
-    #makes food rener
+    
     for food in foods:
         if food.name == "Apple":
             screen.blit(apple_sprite, (food.x -bush_size/4, food.y -bush_size/4))
@@ -239,29 +255,29 @@ while running:
         if food.name == "Bush":
             screen.blit(bush_sprite, (food.x -bush_size/2, food.y -bush_size/2))
     
-    #makes hervivors have ai and there own loop    
+        
     for a in animals_list:
         a.update()
 
-    #render
+
+    
     for a in animals_list:
         screen.blit(sprite_animal, (a.x - creatures_size/2, a.y - creatures_size/2))
-
-    #render/controls for the player (the player is temoraly)
+    
     screen.blit(sprite_animal, (player_x, player_y))
     teclas = pygame.key.get_pressed()
     if teclas[pygame.K_LEFT] and player_x > 0:
         player_x -= speed
     if teclas[pygame.K_RIGHT] and player_x < screen_width - creatures_size:
         player_x += speed
+    
+        
     if teclas[pygame.K_UP] and player_y > 0:
         player_y -= speed
     if teclas[pygame.K_DOWN] and player_y < screen_height - creatures_size:       
         player_y += speed
     if teclas[pygame.K_ESCAPE]:
         running = False
-    
-
     # Update the actual display
     pygame.display.flip()
 
