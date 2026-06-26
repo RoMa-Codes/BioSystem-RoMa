@@ -7,7 +7,7 @@ import math
 pygame.init()
 ###
 # VARS
-usles_var = 5
+usles_var = 20
 # screen vars
 screen_width=1400
 screen_height=800
@@ -66,19 +66,39 @@ def play_sound(filename):
 
 # creates foods (that are actualy just plants but ig its fine)
 class Food:
-    def __init__(self):
-        Identity = random.randint(1, 10)
-        if Identity < 2:
+    def __init__(self, spawn_x=None, spawn_y=None, name = None):
+        if name == None:
+            Identity = random.randint(1, 10)
+            if Identity < 2:
+                
+                self.name = "Apple"
+            elif Identity > 1 and Identity < 11:
+                
+                self.name = "Bush"
+            elif Identity > 5:
+                
+                self.name = "Plant"
+        else:
+        
+            self.name = name
+
+        if self.name == "Apple":
             self.nutrients = 100
-            self.name = "Apple"
-        elif Identity > 1 and Identity < 11:
+        elif self.name == "Bush":
             self.nutrients = 30
-            self.name = "Bush"
-        elif Identity > 5:
+        elif self.name == "Plant":
             self.nutrients = 5
-            self.name = "Plant"
-        self.x = random.randint(0, screen_width)
-        self.y = random.randint(0, screen_height)
+        #if the spawn isint defined it spawns them at random
+        if spawn_x == None:
+            self.x = random.randint(0, screen_width)
+        else:
+            self.x = spawn_x
+        if spawn_y == None:
+            self.y = random.randint(0, screen_height)
+        else:
+            self.y = spawn_y
+
+
 foods = []
 
 #generates the herb eating creatures (btw adding var = non there makes them opcional)
@@ -130,44 +150,64 @@ class herb_eating_Creatures:
             new_creature.current_neutrients = self.current_neutrients // 2
             self.current_neutrients //= 2
             animals_list.append(new_creature)
-            print(f"{self.name} reproduced! New {new_creature.name} created at ({new_creature.x}, {new_creature.y})")    
-    def update(self):
-        #here we create a timer so in the future we can remove its curent neutriates
-        
-        self.new_timer += 1
-        if self.new_timer >= 20: # this will make it lose nutrients every second, because the game runs at 60 frames per second, so every 60 updates it will lose nutrients. This way we can make it lose nutrients over time and make it need to eat to survive.
-            self.new_timer = 0
-            self.current_neutrients -= 1
-        if self.current_neutrients < 0:
-            #here we remove the creature from the simulation if it dies of hunger, but for now we will just set its nutrients to 0 and make it stop moving, because we haven't implemented death yet and it would break the system if it could die without being removed from the simulation.
-            play_sound("die.mp3")
-            animals_list.remove(self)
-            
-
-        # we create a new variable to store the closest food found in this update cycle, if any
+            print(f"{self.name} reproduced! New {new_creature.name} created at ({new_creature.x}, {new_creature.y})")
+    def hungry(self):
+        # Clear old random targets and look for the closest plant
+        smallest_distance = self.sight  
         clowse_food = None
 
-        # it only looks for food if it needs it, otherwise it just walks around randomly. This way it doesn't break the system by trying to eat when it's not hungry, and also it doesn't waste time looking for food when it's not needed.
+        for food in foods:
+            dist_to_food = math.hypot(food.x - self.x, food.y - self.y)
+            if dist_to_food <= smallest_distance:
+                smallest_distance = dist_to_food
+                clowse_food = food
+
+        # If it finds a plant, override the destination straight to it
+        if clowse_food is not None:
+            self.dest_x = clowse_food.x
+            self.dest_y = clowse_food.y
+        return clowse_food # Pass this back so update knows if we are tracking food
+    def idle(self):
+        # if it reached its destination and it wasn't food, it means it was just a random point to walk to, so it will wait there for a bit and then choose a new random destination to walk to.
+        self.timer += 1
+        if self.new_timer == 1:
+            self.current_neutrients += 1
+        if self.timer >= self.waittimer:
+            self.timer = 0
+            self.waittimer = random.randint(20, 200) 
+                    
+            random_dx = random.randint(-self.radius, self.radius)
+            random_dy = random.randint(-self.radius, self.radius)
+                    
+            if random_dx != 0 or random_dy != 0:
+                self.dest_x = max(0, min(screen_width - creatures_size, self.x + random_dx))
+                self.dest_y = max(0, min(screen_height - creatures_size, self.y + random_dy))
+        
+    
+    def panic(self):
+        pass
+    def update(self):
+        # die parts so if u aret eating ur neutients disapier
+        self.new_timer += 1
+        if self.new_timer >= 20: 
+            self.new_timer = 0
+            self.current_neutrients -= 1
+        #if u have no neutrients u die because thats just how it is    
+        if self.current_neutrients < 0:
+            play_sound("die.mp3")
+            animals_list.remove(self)
+            return
+
+        # do i wander or look for food
         if self.current_neutrients < self.want_nutrients:
-            
-            # Solo si tiene hambre extrema, ejecuta el código de buscar comida:
-            smallest_distance = self.sight  
+            # i am hungry
+            active_target_food = self.hungry() 
+        else:
+            #i am not hungry
+            active_target_food = None
 
-            for food in foods:
-                dist_to_food = math.hypot(food.x - self.x, food.y - self.y)
-                if dist_to_food <= smallest_distance:
-                    smallest_distance = dist_to_food
-                    clowse_food = food
 
-            # if it find food, it sets the destination to the food's position, otherwise it will just keep walking randomly until it finds some or gets hungry enough to look for it again.
-            if clowse_food is not None:
-                self.dest_x = clowse_food.x
-                self.dest_y = clowse_food.y
-
-        if self.current_neutrients > self.repro_nutrients:
-            self.repoduce()
-                
-        # movement code, it will move towards the destination set by the food searching code if it found some, otherwise it will just keep moving towards a random destination that changes every few seconds. When it reaches the destination, if it's a food, it will eat it and gain nutrients, if it's just a random point, it will wait there for a bit and then choose a new random destination to walk to.
+        # movement code
         self.x_dist = self.dest_x - self.x
         self.y_dist = self.dest_y - self.y
         self.distance = math.hypot(self.x_dist, self.y_dist)
@@ -175,50 +215,31 @@ class herb_eating_Creatures:
         if self.distance > self.norm_speed:
             self.x += (self.x_dist / self.distance) * self.norm_speed
             self.y += (self.y_dist / self.distance) * self.norm_speed
-             
         else:
-            # Si llegó a su destino y era un alimento, lo come y gana nutrientes:
-            if clowse_food is not None:
-                self.current_neutrients += clowse_food.nutrients 
+            # destination reached
+            if active_target_food is not None:
                 
-                # if the nutrients gained by eating the food exceed the creature's want_nutrients, it will just set its current_neutrients to want_nutrients, because it doesn't need more than that and it would break the system if it could keep gaining nutrients infinitely.
-
-
-                print(f"ate: {clowse_food.name} | +{clowse_food.nutrients} nutrientes")
-                print(f"entity current nutrients: {self.current_neutrients}")
-                
-                if clowse_food in foods:
+                # FIRST check if the food is still alive in the global list!
+                if active_target_food in foods:
+                    # It is safe! Now we can read its nutrients
+                    self.current_neutrients += active_target_food.nutrients
+                    
+                    if self.current_neutrients > self.want_nutrients:
+                        self.current_neutrients = self.want_nutrients
+                    
                     play_sound("eating_sound.mp3")
-                    foods.remove(clowse_food)
-                
-                self.x = self.dest_x
-                self.y = self.dest_y
-                clowse_food = None 
-                self.timer = 0
-                
-            else:
-                # if it reached its destination and it wasn't food, it means it was just a random point to walk to, so it will wait there for a bit and then choose a new random destination to walk to.
-                self.timer += 1
-                if self.new_timer == 0:
-                    self.current_neutrients += 1
-                if self.timer >= self.waittimer:
+                    foods.remove(active_target_food)
                     self.timer = 0
-                    self.waittimer = random.randint(20, 200) 
-                    
-                    random_dx = random.randint(-self.radius, self.radius)
-                    random_dy = random.randint(-self.radius, self.radius)
-                    
-                    if random_dx != 0 or random_dy != 0:
-                        self.dest_x = max(0, min(screen_width - creatures_size, self.x + random_dx))
-                        self.dest_y = max(0, min(screen_height - creatures_size, self.y + random_dy))
-    def repoduce(self):
-        # if it has enough nutrients to reproduce, it will create a new creature of the same type and give it some of its nutrients to start with, and then it will lose some of its own nutrients to account for the energy spent in reproduction. This way we can have a population of creatures that can grow and shrink over time depending on the availability of food and the success of their reproduction.
-        if self.current_neutrients >= self.repro_nutrients:
-            new_creature = herb_eating_Creatures(self.x, self.y)
-            new_creature.current_neutrients = self.current_neutrients // 2
-            self.current_neutrients //= 2
-            animals_list.append(new_creature)
-            print(f"{self.name} reproduced! New {new_creature.name} created at ({new_creature.x}, {new_creature.y})")    
+                else:
+                    # Someone else stole the food this frame! Reset to idle
+                    self.idle()
+            else:
+                # The destination was just a random point
+                self.idle()
+
+
+                
+
 
         
 
@@ -233,6 +254,7 @@ for i in range(5):
 
 
 while running:
+
     # Look for events (mouse clicks, key presses)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -241,13 +263,39 @@ while running:
     # 
     clock.tick(60)
     food_timer += 1
-    for a in foods:
-        if food_timer >= 60:
-            food_timer = 0
-            foods.append(Food())
+    # --- TEMPORARY CLUSTER TEST BLOCK ---
+    # Replace your old food spawning timer with this:
+
+    if food_timer >= 60:
+        food_timer = 0
+        
+        if len(foods) > 0:
+            # 1. Pick a random parent plant that is already on the screen
+            parent = random.choice(foods)
+            
+            # 2. Spawn a new food object instance
+            new_seed = Food(name=parent.name)
+
+            
+            # 3. Quick & dirty radius offset math (Minimum 100 pixels away, max 180)
+            offset_x = random.choice([random.randint(-bush_size*4, -bush_size*4), random.randint(bush_size*4, bush_size*4)])
+            offset_y = random.choice([random.randint(-bush_size*4, -bush_size*4), random.randint(bush_size*4, bush_size*4)])
+            
+            # 4. Apply the offset to the parent's current position
+            new_seed.x = parent.x + offset_x
+            new_seed.y = parent.y + offset_y
+            
+            # 5. Fast map boundary clamp so they don't clip off-screen
+            new_seed.x = max(0, min(screen_width - bush_size, new_seed.x))
+            new_seed.y = max(0, min(screen_height - bush_size, new_seed.y))
+            
+            # 6. Drop it into the active simulation list!
+            foods.append(new_seed)
+        
+
+    
     
     screen.fill((0, 128, 0))
-    
     for food in foods:
         if food.name == "Apple":
             screen.blit(apple_sprite, (food.x -bush_size/4, food.y -bush_size/4))
