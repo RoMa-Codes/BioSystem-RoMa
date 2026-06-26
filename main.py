@@ -263,8 +263,8 @@ while running:
     # 
     clock.tick(60)
     food_timer += 1
-
-    if food_timer >= 60:
+    #food timer to spawn food evry x amount of time
+    if food_timer >= random.randint(30, 120]):
         food_timer = 0
         #len means that it looks at how many objects are in the list
         if len(foods) > 0:
