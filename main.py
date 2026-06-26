@@ -263,12 +263,10 @@ while running:
     # 
     clock.tick(60)
     food_timer += 1
-    # --- TEMPORARY CLUSTER TEST BLOCK ---
-    # Replace your old food spawning timer with this:
 
     if food_timer >= 60:
         food_timer = 0
-        
+        #len means that it looks at how many objects are in the list
         if len(foods) > 0:
             # 1. Pick a random parent plant that is already on the screen
             parent = random.choice(foods)
