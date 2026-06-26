@@ -139,6 +139,9 @@ class herb_eating_Creatures:
         # variables to remember the destination and a timer for waiting
         self.dest_x = self.x
         self.dest_y = self.y
+        #this var is just the dest for a tick ago
+        self.last_x = self.x
+        self.last_y = self.y
         #creating timers vars
         self.waittimer = random.randint(20, 60)
         self.new_timer = 0 
@@ -188,10 +191,8 @@ class herb_eating_Creatures:
         pass
     def update(self):
         # die parts so if u aret eating ur neutients disapier
-        self.new_timer += 1
-        if self.new_timer >= 20: 
-            self.new_timer = 0
-            self.current_neutrients -= 1
+        if self.x != self.last_x or self.y != self.last_y:
+            self.current_neutrients = -1/20
         #if u have no neutrients u die because thats just how it is    
         if self.current_neutrients < 0:
             play_sound("die.mp3")
@@ -236,6 +237,9 @@ class herb_eating_Creatures:
             else:
                 # The destination was just a random point
                 self.idle()
+        self.last_x = self.x
+        self.last_y = self.y
+
 
 
                 
