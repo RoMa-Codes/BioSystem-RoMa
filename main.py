@@ -296,7 +296,8 @@ while running:
         
 
     
-    
+    if len(foods) > 100:
+        foods.remove(len(foods))
     screen.fill((0, 128, 0))
     for food in foods:
         if food.name == "Apple":
